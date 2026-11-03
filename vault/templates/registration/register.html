@@ -1,0 +1,7 @@
+<h1>TrustVault - Register</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Create account</button>
+</form>
+<p><a href="{% url 'login' %}">I already have an account</a></p>
