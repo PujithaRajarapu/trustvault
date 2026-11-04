@@ -30,4 +30,4 @@ Where the AI was wrong, and what I did about it.
 - **Asked:** Test that my tests catch a removed check.
 - **What happened:** I turned off `if not allowed: raise Http404()` in `authorise()`. Two tests failed (`test_grant_allows_then_revoke_blocks` and one more). This proved the tests catch a removed check.
 - **Fix:** I turned the check back on and all 6 tests passed.
-- **Commit:** https://github.com/PujithaRajarapu/trustvault/commit/YOUR_COMMIT
+- **Commit:** https://github.com/PujithaRajarapu/trustvault/commit/b3c9d1e
