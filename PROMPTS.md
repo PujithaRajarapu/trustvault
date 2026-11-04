@@ -28,6 +28,6 @@ Where the AI was wrong, and what I did about it.
 
 ## 5. 4 Nov 2026: The access check was switched off (authorisation)
 - **Asked:** Test that my tests catch a removed check.
-- **What happened:** I turned off `if not allowed: raise Http404()` in `authorise()`. Two tests failed (`test_grant_allows_then_revoke_blocks` and one more). This proved the tests catch a removed check.
-- **Fix:** I turned the check back on and all 6 tests passed.
-- **Commit:** https://github.com/PujithaRajarapu/trustvault/commit/b3c9d1e
+- **What happened:** On my computer I turned off `if not allowed: raise Http404()` in `authorise()`. Two tests failed (`test_grant_allows_then_revoke_blocks` and one more). This proved the tests catch a removed check.
+- **Fix:** I turned the check back on. The switched-off version was never committed. The correct guard code is in the commit below.
+- **Commit:** https://github.com/PujithaRajarapu/trustvault/commit/a08280e
