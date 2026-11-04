@@ -2,6 +2,8 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
+from django.http import FileResponse
+from .permissions import authorise
 
 from .audit import log_event
 from .forms import UploadForm
@@ -48,3 +50,14 @@ def upload(request):
     else:
         form = UploadForm()
     return render(request, "upload.html", {"form": form})
+@login_required
+def download(request, doc_id):
+    doc = authorise(request, doc_id, "download")
+    response = FileResponse(
+        doc.file.open("rb"),
+        as_attachment=True,
+        filename=doc.original_name,
+        content_type=doc.content_type,
+    )
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
