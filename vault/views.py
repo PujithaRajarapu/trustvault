@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
@@ -7,7 +7,7 @@ from .permissions import authorise
 
 from .audit import log_event
 from .forms import UploadForm
-from .models import Document, Profile
+from .models import Document, Grant, Profile
 from .validators import clean_name
 
 
@@ -62,3 +62,37 @@ def download(request, doc_id):
     )
     response["X-Content-Type-Options"] = "nosniff"
     return response
+
+@login_required
+def share(request, doc_id):
+    doc = authorise(request, doc_id, "share")
+    message = ""
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        level = request.POST.get("level", "read")
+        if level not in ("read", "edit"):
+            level = "read"
+        target = get_user_model().objects.filter(username=username).first()
+        if target is None or target.id == request.user.id:
+            message = "Could not share with that user."
+        else:
+            Grant.objects.update_or_create(
+                document=doc,
+                user=target,
+                defaults={"level": level, "granted_by": request.user},
+            )
+            log_event(request.user, "grant", doc, True, "to " + target.username + " (" + level + ")")
+            message = "Shared with " + target.username + "."
+    grants = Grant.objects.filter(document=doc).select_related("user")
+    return render(request, "share.html", {"doc": doc, "grants": grants, "message": message})
+
+@login_required
+def revoke(request, doc_id, user_id):
+    doc = authorise(request, doc_id, "revoke")
+    if request.method == "POST":
+        grant = Grant.objects.filter(document=doc, user_id=user_id).first()
+        if grant is not None:
+            name = grant.user.username
+            grant.delete()
+            log_event(request.user, "revoke", doc, True, "from " + name)
+    return redirect("share", doc_id=doc.id)
