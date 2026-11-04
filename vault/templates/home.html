@@ -4,3 +4,18 @@
   {% csrf_token %}
   <button type="submit">Log out</button>
 </form>
+<p><a href="{% url 'upload' %}">Upload a document</a></p>
+
+<h2>My documents</h2>
+{% if docs %}
+<ul>
+  {% for d in docs %}
+  <li>
+    {{ d.title }} ({{ d.original_name }})
+    <a href="{% url 'download' d.id %}">Download</a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>You have not uploaded anything yet.</p>
+{% endif %}

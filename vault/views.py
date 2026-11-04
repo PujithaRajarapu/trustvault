@@ -27,7 +27,8 @@ def register(request):
 
 @login_required
 def home(request):
-    return render(request, "home.html")
+    docs = Document.objects.filter(owner=request.user, is_deleted=False).order_by("-uploaded_at")
+    return render(request, "home.html", {"docs": docs})
 
 
 @login_required
