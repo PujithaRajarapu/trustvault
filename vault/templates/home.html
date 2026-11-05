@@ -1,48 +1,163 @@
-<style>
-  body { background: #eef2f7; font-family: Arial, sans-serif; margin: 0; padding: 24px; color: #222; max-width: 800px; margin: 0 auto; }
-  h1 { color: #1f3a5f; }
-  h2 { color: #1f3a5f; border-bottom: 2px solid #cfd8e3; padding-bottom: 6px; }
-  a { color: #1f6feb; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  button { background: #1f6feb; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-  button:hover { background: #1558c0; }
-  li { background: white; padding: 10px; margin-bottom: 8px; border-radius: 8px; list-style: none; }
-  ul { padding: 0; }
-</style>
-<h1>TrustVault</h1>
-<p>You are signed in as {{ request.user.username }}</p>
-<form method="post" action="{% url 'logout' %}">
-  {% csrf_token %}
-  <button type="submit">Log out</button>
-</form>
-<p><a href="{% url 'upload' %}">Upload a document</a></p>
-<p><a href="{% url 'search' %}">Search</a></p>
 
-<h2>My documents</h2>
-{% if docs %}
-<ul>
-  {% for d in docs %}
-  <li>
-    {{ d.title }} ({{ d.original_name }})
-    <a href="{% url 'download' d.id %}">Download</a>
-    <a href="{% url 'share' d.id %}">Share</a>
-    <form method="post" action="{% url 'delete' d.id %}" style="display:inline">
-      {% csrf_token %}
-      <button type="submit">Delete</button>
-    </form>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>You have not uploaded anything yet.</p>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustVault - My Documents</title>
 
-<h2>Shared with me</h2>
-{% for g in shared %}
+  <style>
+    body {
+      background: #eef2f7;
+      font-family: Arial, sans-serif;
+      margin: 0 auto;
+      padding: 24px;
+      color: #222;
+      max-width: 800px;
+    }
+
+    h1, h2 {
+      color: #1f3a5f;
+    }
+
+    h2 {
+      border-bottom: 2px solid #cfd8e3;
+      padding-bottom: 8px;
+      margin-top: 30px;
+    }
+
+    a {
+      color: #1f6feb;
+      text-decoration: none;
+      margin-right: 12px;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    button {
+      background: #1f6feb;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1558c0;
+    }
+
+    .delete-btn {
+      background: #dc3545;
+    }
+
+    .delete-btn:hover {
+      background: #b02a37;
+    }
+
+    li, .shared-item {
+      background: white;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      list-style: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    ul {
+      padding: 0;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .actions form {
+      display: inline;
+    }
+
+    .logout {
+      margin: 15px 0;
+    }
+
+    .empty {
+      color: #666;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>TrustVault</h1>
+
+  <p>You are signed in as <strong>{{ request.user.username }}</strong></p>
+
+  <form method="post" action="{% url 'logout' %}" class="logout">
+    {% csrf_token %}
+    <button type="submit">Log out</button>
+  </form>
+
   <p>
-    {{ g.document.title }} from {{ g.document.owner.username }} ({{ g.level }})
-    <a href="{% url 'download' g.document.id %}">Download</a>
+    <a href="{% url 'upload' %}">+ Upload a document</a>
+    <a href="{% url 'search' %}">Search documents</a>
   </p>
-{% empty %}
-  <p>Nothing has been shared with you.</p>
-{% endfor %}
+
+  <h2>My documents</h2>
+
+  {% if docs %}
+    <ul>
+      {% for d in docs %}
+        <li>
+          <strong>{{ d.title }}</strong>
+          <p>File: {{ d.original_name }}</p>
+
+          <div class="actions">
+            <a href="{% url 'download' d.id %}">Download</a>
+
+            <a href="{% url 'share' d.id %}">Share</a>
+
+            <form method="post"
+                  action="{% url 'delete' d.id %}"
+                  onsubmit="return confirm('Are you sure you want to delete this document?');">
+              {% csrf_token %}
+              <button type="submit" class="delete-btn">
+                Delete
+              </button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">You have not uploaded any documents yet.</p>
+  {% endif %}
+
+  <h2>Shared with me</h2>
+
+  {% for g in shared %}
+    <div class="shared-item">
+      <strong>{{ g.document.title }}</strong>
+      <p>
+        From: {{ g.document.owner.username }}
+        ({{ g.level }})
+      </p>
+
+      <a href="{% url 'download' g.document.id %}">
+        Download
+      </a>
+    </div>
+  {% empty %}
+    <p class="empty">Nothing has been shared with you.</p>
+  {% endfor %}
+
+</body>
+</html>
