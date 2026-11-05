@@ -102,3 +102,29 @@ class AccessTests(TestCase):
         self.client.login(username="owner", password="pass12345")
         resp = self.client.get(reverse("download", args=[999999]))
         self.assertEqual(resp.status_code, 404)
+
+class SearchTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.owner = User.objects.create_user("owner2", password="pass12345")
+        self.stranger = User.objects.create_user("stranger2", password="pass12345")
+        self.doc = Document.objects.create(
+            owner=self.owner,
+            title="topsecretplan",
+            file=SimpleUploadedFile("x.png", PNG),
+            original_name="x.png",
+            content_type="image/png",
+            size_bytes=len(PNG),
+        )
+
+    def test_owner_finds_own_document(self):
+        self.client.login(username="owner2", password="pass12345")
+        resp = self.client.get(reverse("search"), {"q": "topsecret"})
+        self.assertContains(resp, "topsecretplan")
+
+    def test_stranger_does_not_find_it(self):
+        self.client.login(username="stranger2", password="pass12345")
+        resp = self.client.get(reverse("search"), {"q": "topsecret"})
+        self.assertNotContains(resp, "topsecretplan")
+        self.assertContains(resp, "No matching documents.")
+        
