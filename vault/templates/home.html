@@ -15,6 +15,10 @@
     {{ d.title }} ({{ d.original_name }})
     <a href="{% url 'download' d.id %}">Download</a>
     <a href="{% url 'share' d.id %}">Share</a>
+    <form method="post" action="{% url 'delete' d.id %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit">Delete</button>
+    </form>
   </li>
   {% endfor %}
 </ul>
