@@ -2,9 +2,11 @@
 
 Where the AI was wrong, and what I did about it.
 
+AI tool used: Claude (claude.ai), in chat, to guide me step by step.
+
 ## 1. 3 Nov 2026: Choosing a stack (a decision, not a mistake)
 - **Asked:** Which stack should I use? I said I did not know.
-- **What happened:** The AI first suggested Node, then picked Django after I said I did not know.
+- **What happened:** The AI first suggested Node with Express, which I did not know. When I said I knew some Python, it picked Django.
 - **Decision:** I went with Django because it has login and migrations built in, and I can explain it.
 - **Commit:** https://github.com/PujithaRajarapu/trustvault/commit/84cbbcf
 
@@ -28,11 +30,23 @@ Where the AI was wrong, and what I did about it.
 
 ## 5. 4 Nov 2026: Proving my tests catch a removed access check (authorisation)
 - **Asked:** How do I know my tests would fail if the check were removed?
-- **What I did:** On my computer I commented out `if not allowed: raise Http404()` in `authorise()`. Three tests failed (`test_stranger_gets_404`, `test_grant_allows_then_revoke_blocks`, `test_read_grant_cannot_share`). I then removed the `#` marks and all tests passed again.
+- **What I did:** On my computer I switched off `if not allowed: raise Http404()` in `authorise()`. Several tests failed, including `test_stranger_gets_404`, `test_grant_allows_then_revoke_blocks` and `test_read_grant_cannot_share`. I then put the check back and all tests passed again.
 - **Result:** The tests really do catch a removed check. The switched-off version was never committed.
-- **Commit with the tests:** https://github.com/PujithaRajarapu/trustvault/commit/80742a2
-## 6. 5 Nov 2026: A rewrite of my tests removed some of them (authorisation tests)
+- **Commits:** https://github.com/PujithaRajarapu/trustvault/commit/9234a5a (check restored, tests pass) and https://github.com/PujithaRajarapu/trustvault/commit/80742a2 (the tests)
+
+## 6. 5 Nov 2026: The AI told me to delete my own tests (authorisation tests)
 - **Asked:** Tests proving that a stranger cannot download a document and that revoke works at once.
-- **What went wrong:** The new version of tests.py (commit 5c9e838) removed 53 lines and added 29. Some of my earlier tests were lost.
-- **Fix:** I restored my earlier tests and added more stranger and revoke tests in commit 80742a2. All tests pass.
-- **Commits:** 5c9e838 (the problem), 80742a2 (the fix)
+- **AI got wrong:** It told me to select all of `tests.py` and delete it, without checking what was in it. My file already had 6 tests (53 lines), including real file downloads and a test that the audit chain detects tampering. They were removed in commit 5c9e838.
+- **Fix:** I got the old file back from Git (`git show 357d5e8:vault/tests.py`) and merged it with 7 new tests: anonymous user, edit grant cannot share, stranger cannot open the share page, stranger cannot grant themselves access, stranger cannot revoke, deleted document, missing document. All 13 tests pass.
+- **Commits:** https://github.com/PujithaRajarapu/trustvault/commit/5c9e838 (the problem) and https://github.com/PujithaRajarapu/trustvault/commit/80742a2 (the fix)
+
+## 7. 5 Nov 2026: First replacement tests were too weak (access control)
+- **Asked:** A small set of tests for the access check.
+- **AI got wrong:** It only called `authorise()` directly with a fake file path. A page that forgot to call `authorise()` would still pass, and no real download was tested.
+- **Fix:** I kept my own tests, which go through the real download and share pages with a real uploaded file, and added the stranger cases.
+- **Commit:** https://github.com/PujithaRajarapu/trustvault/commit/80742a2
+
+## Instructions I reused with the AI
+- "One command at a time" (after pasted multi-line commands ran together).
+- "Explain it in simple words" and "give me only one step".
+- "Check against my real files before changing anything."
