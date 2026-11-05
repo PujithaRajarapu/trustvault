@@ -1,0 +1,37 @@
+<h1>Document activity</h1>
+<p><a href="{% url 'home' %}">Back</a></p>
+
+{% if chain_ok %}
+<p><strong>Audit log check: OK.</strong> No line has been changed.</p>
+{% else %}
+<p><strong>WARNING: the audit log has been changed. First broken line: {{ broken_id }}</strong></p>
+{% endif %}
+
+<p>Total entries: {{ total }}. Refused attempts: {{ denied_total }}.</p>
+
+<p>
+  <a href="{% url 'activity' %}">All</a> |
+  <a href="{% url 'activity' %}?denied=1">Refused only</a> |
+  <a href="{% url 'activity' %}?action=grant">Grants</a> |
+  <a href="{% url 'activity' %}?action=revoke">Revokes</a> |
+  <a href="{% url 'activity' %}?action=download">Downloads</a> |
+  <a href="{% url 'activity' %}?action=upload">Uploads</a>
+</p>
+
+<table border="1" cellpadding="4">
+  <tr>
+    <th>Time</th><th>Who</th><th>Action</th><th>Document</th><th>Result</th><th>Detail</th>
+  </tr>
+  {% for e in entries %}
+  <tr>
+    <td>{{ e.timestamp|date:"d M Y H:i:s" }}</td>
+    <td>{{ e.actor }}</td>
+    <td>{{ e.action }}</td>
+    <td>{{ e.document_title }}</td>
+    <td>{% if e.allowed %}Allowed{% else %}<strong>DENIED</strong>{% endif %}</td>
+    <td>{{ e.detail }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="6">No entries.</td></tr>
+  {% endfor %}
+</table>
