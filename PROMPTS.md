@@ -31,15 +31,8 @@ Where the AI was wrong, and what I did about it.
 - **What I did:** On my computer I commented out `if not allowed: raise Http404()` in `authorise()`. Three tests failed (`test_stranger_gets_404`, `test_grant_allows_then_revoke_blocks`, `test_read_grant_cannot_share`). I then removed the `#` marks and all tests passed again.
 - **Result:** The tests really do catch a removed check. The switched-off version was never committed.
 - **Commit with the tests:** https://github.com/PujithaRajarapu/trustvault/commit/80742a2
-
-## 6. 5 Nov 2026: A test file was replaced without checking what was in it (authorisation tests)
-- **Asked:** Tests proving that a stranger cannot download a document.
-- **AI got wrong:** [Write this only if it is true from your own history. See the note below.]
-- **Fix:** [What you did to get the tests back.]
-- **Commits:** [Only commit numbers you have checked with `git show`.]
-
-## Instructions I reused with the AI
-- "One command at a time" (after pasted multi-line commands ran together).
-- "Explain it in simple words" and "give me only one step".
-- "Check against my real files before changing anything."
-- AI tool I used: Claude (claude.ai).
+## 6. 5 Nov 2026: A rewrite of my tests removed some of them (authorisation tests)
+- **Asked:** Tests proving that a stranger cannot download a document and that revoke works at once.
+- **What went wrong:** The new version of tests.py (commit 5c9e838) removed 53 lines and added 29. Some of my earlier tests were lost.
+- **Fix:** I restored my earlier tests and added more stranger and revoke tests in commit 80742a2. All tests pass.
+- **Commits:** 5c9e838 (the problem), 80742a2 (the fix)
