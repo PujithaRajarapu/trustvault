@@ -5,7 +5,8 @@ A secure document-sharing website. A document can only be opened by its owner an
 **Live site:** https://trustvault-pooja.onrender.com
 (The free plan sleeps when idle. The first load can take about a minute.)
 
-**Demo video:** https://youtu.be/lYfRNTQ4_zU
+
+**Demo video:** https://youtu.be/hJJelODK9Wg
 
 ## Demo logins
 
@@ -79,7 +80,7 @@ Locally it uses SQLite. On Render it uses Postgres (Neon).
     .venv\Scripts\activate
     pip install -r requirements.txt
     python manage.py migrate
-    $env:DEMO_PASSWORD="Rise@123"
+    | `DEMO_PASSWORD` | The password for the demo accounts (`Rise@123`) |
     python manage.py seed_demo
     python manage.py runserver
 
@@ -115,8 +116,7 @@ On Mac or Linux, activate with `source .venv/bin/activate`.
 See THREATS.md.
 
 ## AI use
-
-See PROMPTS.md. I used Claude (claude.ai) in chat to guide me step by step, and the AI made mistakes that I caught and fixed. They are described there.
+See PROMPTS.md. I used Claude (claude.ai) in chat to guide me step by step. I also used ChatGPT and DeepSeek after building, to test and review my code. The AI made mistakes that I caught and fixed. They are described there.
 
 ## Known limits (what is unfinished)
 
@@ -126,5 +126,5 @@ See PROMPTS.md. I used Claude (claude.ai) in chat to guide me step by step, and 
 - Attempts by people who are not logged in are not written to the audit log, because the login redirect happens first.
 - The audit chain has no secret key, so someone with full database access could rewrite it, and deleting the last lines would not be noticed.
 - Opening the share page is logged as an allowed "share" action even when nothing is changed.
-- The pages are plain HTML with no styling.
+- The pages have only simple styling (colours and spacing), so the design is basic.
 - I have not tested very large files or many users at once.

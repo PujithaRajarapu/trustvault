@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}TrustVault{% endblock %} - TrustVault</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; font-family: "Segoe UI", Arial, sans-serif; color: #0b1d4d;
+    background: radial-gradient(circle at 10% 10%, #cfe0ff 0, transparent 40%),
+                radial-gradient(circle at 95% 95%, #b7d0ff 0, transparent 40%), #f3f7ff;
+  }
+  header { background: #fff; box-shadow: 0 4px 18px rgba(30,80,180,.12); }
+  .bar { max-width: 900px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #0b1d4d; text-decoration: none; }
+  .brand svg { width: 28px; height: 32px; }
+  nav { display: flex; align-items: center; gap: 16px; margin-left: auto; flex-wrap: wrap; }
+  nav a { color: #0b3fc4; font-weight: 700; text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  nav .who { color: #5a6b8f; font-size: 14px; }
+  nav form { margin: 0; }
+  main { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+  .narrow { max-width: 440px; margin: 0 auto; }
+  h1 { font-size: 32px; font-weight: 800; letter-spacing: -.5px; margin: 0 0 18px; }
+  h2 { font-size: 22px; margin: 28px 0 12px; }
+  .card { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 14px 34px rgba(30,80,180,.15); margin-bottom: 20px; }
+  p { line-height: 1.5; }
+  a { color: #0b3fc4; }
+  input[type=text], input[type=password], input[type=file], input[type=search], select, textarea {
+    width: 100%; padding: 12px 14px; font-size: 16px; border: 2px solid #dbe4f5; border-radius: 12px; background: #fff; outline: none;
+  }
+  input:focus, select:focus { border-color: #2f6fe0; }
+  .card p label, .card label { display: block; font-weight: 700; margin-bottom: 6px; }
+  .card p { margin: 0 0 16px; }
+  .helptext, .card ul { font-size: 13px; color: #5a6b8f; }
+  .errorlist { color: #a11; list-style: none; padding: 0; margin: 4px 0; font-size: 14px; }
+  button, .btn {
+    display: inline-block; padding: 12px 22px; font-size: 16px; font-weight: 700; color: #fff; border: 0; border-radius: 12px;
+    cursor: pointer; text-decoration: none; background: linear-gradient(90deg, #2f80ed, #0a3aa8);
+    box-shadow: 0 6px 14px rgba(10,58,168,.3);
+  }
+  button:hover, .btn:hover { filter: brightness(1.08); }
+  .btn-small { padding: 7px 14px; font-size: 14px; border-radius: 10px; box-shadow: none; }
+  .btn-light { background: #e8efff; color: #0b3fc4; box-shadow: none; }
+  .btn-danger { background: linear-gradient(90deg, #e5484d, #b3262b); box-shadow: none; }
+  .list { list-style: none; padding: 0; margin: 0; }
+  .list li { background: #fff; border-radius: 14px; padding: 14px 18px; margin-bottom: 10px; display: flex; align-items: center;
+             gap: 10px; flex-wrap: wrap; box-shadow: 0 6px 18px rgba(30,80,180,.10); }
+  .list .grow { flex: 1; min-width: 160px; }
+  .list .meta { color: #5a6b8f; font-size: 14px; }
+  .list form { margin: 0; display: inline; }
+  .msg { background: #e6f4ea; color: #1b5e20; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; }
+  .empty { color: #5a6b8f; background: #fff; border-radius: 14px; padding: 16px 18px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e6ecf8; font-size: 14px; }
+  th { background: #eef3ff; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="brand" href="{% url 'home' %}">
+      <svg viewBox="0 0 84 96" aria-hidden="true">
+        <defs><linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f80ed"/><stop offset="1" stop-color="#0a2f8f"/></linearGradient></defs>
+        <path d="M42 3 L78 16 V46 C78 68 62 84 42 93 C22 84 6 68 6 46 V16 Z" fill="url(#gb)"/>
+        <rect x="27" y="40" width="30" height="24" rx="4" fill="#fff"/>
+        <path d="M32 40 V32 a10 10 0 0 1 20 0 V40" fill="none" stroke="#fff" stroke-width="5"/>
+      </svg>
+      TrustVault
+    </a>
+    {% if user.is_authenticated %}
+    <nav>
+      <a href="{% url 'home' %}">My documents</a>
+      <a href="{% url 'upload' %}">Upload</a>
+      <a href="{% url 'search' %}">Search</a>
+      {% if user.profile.role == "admin" %}<a href="{% url 'activity' %}">Activity</a>{% endif %}
+      <span class="who">{{ user.username }}</span>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="btn-small btn-light">Log out</button></form>
+    </nav>
+    {% endif %}
+  </div>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

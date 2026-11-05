@@ -1,16 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrustVault - Log in</title>
 <style>
-  body { background: #eef2f7; font-family: Arial, sans-serif; padding: 24px; color: #222; max-width: 420px; margin: 0 auto; }
-  h1 { color: #1f3a5f; }
-  a { color: #1f6feb; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  input { padding: 8px; border: 1px solid #b8c4d4; border-radius: 6px; width: 100%; box-sizing: border-box; }
-  button { background: #1f6feb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-  button:hover { background: #1558c0; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    font-family: "Segoe UI", Arial, sans-serif; color: #0b1d4d;
+    background: radial-gradient(circle at 10% 10%, #cfe0ff 0, transparent 40%),
+                radial-gradient(circle at 95% 95%, #b7d0ff 0, transparent 40%), #f3f7ff;
+  }
+  .wrap { width: 100%; max-width: 440px; padding: 24px; text-align: center; }
+  .logo svg { width: 84px; height: 96px; }
+  h1 { margin: 8px 0 4px; font-size: 40px; font-weight: 800; letter-spacing: -1px; }
+  .sub { display: flex; align-items: center; gap: 12px; color: #0b1d4d; font-weight: 600; margin: 10px 0 20px; }
+  .sub::before, .sub::after { content: ""; flex: 1; height: 2px; background: #4a7fd6; opacity: .7; }
+  .card { background: #fff; border-radius: 22px; padding: 28px; text-align: left;
+          box-shadow: 0 18px 40px rgba(30, 80, 180, .18); }
+  label { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 8px; }
+  label svg { width: 20px; height: 20px; fill: #0b2a6b; }
+  .field { position: relative; margin-bottom: 20px; }
+  input[type=text], input[type=password] {
+    width: 100%; padding: 14px 16px; font-size: 16px; border: 2px solid #dbe4f5;
+    border-radius: 14px; outline: none; background: #fff;
+  }
+  input:focus { border-color: #2f6fe0; }
+  .eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+         background: none; border: 0; cursor: pointer; padding: 4px; }
+  .eye svg { width: 22px; height: 22px; fill: #0b2a6b; }
+  .btn { width: 100%; padding: 15px; font-size: 18px; font-weight: 700; color: #fff; border: 0;
+         border-radius: 16px; cursor: pointer;
+         background: linear-gradient(90deg, #2f80ed, #0a3aa8); box-shadow: 0 8px 18px rgba(10, 58, 168, .35); }
+  .btn:hover { filter: brightness(1.08); }
+  .or { display: flex; align-items: center; gap: 12px; margin: 22px 0 0; justify-content: center; }
+  .or::before, .or::after { content: ""; flex: 1; height: 2px; background: #c6d4ee; }
+  .or a { color: #0b3fc4; font-weight: 700; text-decoration: none; }
+  .err { background: #fdecec; color: #a11; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; }
 </style>
-<h1>TrustVault - Log in</h1>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Log in</button>
-</form>
-<p><a href="{% url 'register' %}">Create an account</a></p>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <svg viewBox="0 0 84 96" aria-hidden="true">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2f80ed"/><stop offset="1" stop-color="#0a2f8f"/></linearGradient></defs>
+      <path d="M42 3 L78 16 V46 C78 68 62 84 42 93 C22 84 6 68 6 46 V16 Z" fill="url(#g)"/>
+      <rect x="27" y="40" width="30" height="24" rx="4" fill="#fff"/>
+      <path d="M32 40 V32 a10 10 0 0 1 20 0 V40" fill="none" stroke="#fff" stroke-width="5"/>
+      <circle cx="42" cy="50" r="3.2" fill="#0a2f8f"/><rect x="40.5" y="50" width="3" height="8" rx="1.5" fill="#0a2f8f"/>
+    </svg>
+  </div>
+  <h1>TrustVault</h1>
+  <div class="sub">Log in to your account</div>
+
+  <form method="post" class="card">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% if form.errors %}<div class="err">Wrong username or password. Please try again.</div>{% endif %}
+
+    <label for="id_username">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4.5"/><path d="M3.5 21c0-4.7 3.8-7.5 8.5-7.5s8.5 2.8 8.5 7.5z"/></svg>
+      Username
+    </label>
+    <div class="field">
+      <input type="text" name="username" id="id_username" placeholder="Enter your username" autocomplete="username" autofocus required>
+    </div>
+
+    <label for="id_password">
+      <svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1zm2 0h8V8a4 4 0 0 0-8 0z"/></svg>
+      Password
+    </label>
+    <div class="field">
+      <input type="password" name="password" id="id_password" placeholder="Enter your password" autocomplete="current-password" required>
+      <button type="button" class="eye" onclick="var p=document.getElementById('id_password');p.type=p.type==='password'?'text':'password';" aria-label="Show or hide password">
+        <svg viewBox="0 0 24 24"><path d="M12 5C6.5 5 2.5 9 1 12c1.5 3 5.5 7 11 7s9.5-4 11-7c-1.5-3-5.5-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+      </button>
+    </div>
+
+    <button type="submit" class="btn">Log in &rarr;</button>
+    <div class="or"><a href="{% url 'register' %}">Create an account</a></div>
+  </form>
+</div>
+</body>
+</html>
