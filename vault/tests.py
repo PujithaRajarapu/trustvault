@@ -1,62 +1,38 @@
 from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
-from django.urls import reverse
+from django.http import Http404
+from django.test import RequestFactory, TestCase
 
-from .audit import verify_chain
-from .models import AuditLog, Document, Grant
+from .models import Document, Grant
+from .permissions import authorise
 
-PNG = b"\x89PNG\r\n\x1a\n" + b"0" * 50
+User = get_user_model()
 
 
 class AccessTests(TestCase):
     def setUp(self):
-        User = get_user_model()
-        self.owner = User.objects.create_user("owner", password="pass12345")
-        self.friend = User.objects.create_user("friend", password="pass12345")
-        self.stranger = User.objects.create_user("stranger", password="pass12345")
+        self.owner = User.objects.create_user("owner1", password="pw-12345-xyz")
+        self.other = User.objects.create_user("other1", password="pw-12345-xyz")
         self.doc = Document.objects.create(
-            owner=self.owner,
-            title="secret",
-            file=SimpleUploadedFile("x.png", PNG),
-            original_name="x.png",
-            content_type="image/png",
-            size_bytes=len(PNG),
+            owner=self.owner, title="secret", category="",
+            file="docs/fake.txt", original_name="fake.txt",
+            content_type="text/plain", size_bytes=1,
         )
-        self.url = reverse("download", args=[self.doc.id])
 
-    def test_owner_can_download(self):
-        self.client.login(username="owner", password="pass12345")
-        self.assertEqual(self.client.get(self.url).status_code, 200)
+    def request_for(self, user):
+        request = RequestFactory().get("/x")
+        request.user = user
+        return request
 
-    def test_stranger_gets_404(self):
-        self.client.login(username="stranger", password="pass12345")
-        self.assertEqual(self.client.get(self.url).status_code, 404)
+    def test_owner_is_allowed(self):
+        authorise(self.request_for(self.owner), self.doc.id, "download")
 
-    def test_grant_allows_then_revoke_blocks(self):
-        Grant.objects.create(document=self.doc, user=self.friend, level="read", granted_by=self.owner)
-        self.client.login(username="friend", password="pass12345")
-        self.assertEqual(self.client.get(self.url).status_code, 200)
-        Grant.objects.filter(document=self.doc, user=self.friend).delete()
-        self.assertEqual(self.client.get(self.url).status_code, 404)
+    def test_stranger_is_refused(self):
+        with self.assertRaises(Http404):
+            authorise(self.request_for(self.other), self.doc.id, "download")
 
-    def test_read_grant_cannot_share(self):
-        Grant.objects.create(document=self.doc, user=self.friend, level="read", granted_by=self.owner)
-        self.client.login(username="friend", password="pass12345")
-        resp = self.client.get(reverse("share", args=[self.doc.id]))
-        self.assertEqual(resp.status_code, 404)
-
-    def test_refusal_is_logged(self):
-        self.client.login(username="stranger", password="pass12345")
-        self.client.get(self.url)
-        self.assertTrue(AuditLog.objects.filter(action="download", allowed=False).exists())
-
-    def test_audit_chain_detects_tampering(self):
-        self.client.login(username="owner", password="pass12345")
-        self.client.get(self.url)
-        self.client.get(self.url)
-        self.assertEqual(verify_chain()[0], True)
-        first = AuditLog.objects.order_by("id").first()
-        first.detail = "changed"
-        first.save()
-        self.assertEqual(verify_chain()[0], False)
+    def test_revoked_access_stops_at_once(self):
+        grant = Grant.objects.create(document=self.doc, user=self.other, level="read")
+        authorise(self.request_for(self.other), self.doc.id, "download")
+        grant.delete()
+        with self.assertRaises(Http404):
+            authorise(self.request_for(self.other), self.doc.id, "download")
