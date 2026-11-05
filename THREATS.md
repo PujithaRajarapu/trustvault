@@ -18,8 +18,8 @@ For each threat: how it could be attacked, what I did, and which test covers it.
 | 12 | A file name like ../../x writes outside the folder | Files are saved under a random name. The user's name is only for display | Not tested yet |
 | 13 | Files are reached by a public or guessable URL | Files live in `private_files`, which has no public URL. They are only sent by the download page | Not tested yet |
 | 14 | A stranger, or someone with only Read or Edit access, deletes a document | Delete goes through `authorise()` and is owner-only. It needs POST | `vault/test_delete.py` (stranger, read grant, edit grant, GET, anonymous, refusal logged) |
-| 15 | Search shows documents the user may not see | Search only looks at documents the user owns or has a grant for | Search tests in `vault/tests.py` |
-| 16 | A person who is not logged in reaches a page | Pages use `@login_required` and redirect to the login page | Anonymous test in `vault/tests.py` |
+| 15 | Search shows documents the user may not see | Search only looks at documents the user owns or has a grant for | test_stranger_does_not_find_it, test_owner_finds_own_document |
+| 16 | A person who is not logged in reaches a page | Pages use `@login_required` and redirect to the login page | test_anonymous_is_sent_to_login (download page only) |
 | 17 | Debug pages leak code and settings | Production sets `DEBUG=False` on Render. Cookies become secure only then. The code defaults to debug ON if the variable is missing, which is a risk | Checked by hand on the live site |
 | 18 | The secret key is public | The fallback key in `settings.py` is only for local use. The live site uses its own `SECRET_KEY` from the environment | Not tested |
 | 19 | Someone guesses the Django `/admin/` login | Only superusers can enter. The audit log is not registered there. The address is still public | Not tested yet |
