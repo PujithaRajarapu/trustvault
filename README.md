@@ -6,7 +6,13 @@ A secure document-sharing website. A document can only be opened by its owner an
 (The free plan sleeps when idle. The first load can take about a minute.)
 
 
-**Demo video:** https://youtu.be/hJJelODK9Wg
+
+## Demo Video
+
+Watch the TrustVault project demonstration:
+
+[Click here to watch the demo](https://youtu.be/Jk8fNHg4PpQ)
+
 
 ## Demo logins
 
