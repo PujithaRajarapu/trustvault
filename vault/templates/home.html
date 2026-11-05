@@ -20,3 +20,13 @@
 {% else %}
 <p>You have not uploaded anything yet.</p>
 {% endif %}
+
+<h2>Shared with me</h2>
+{% for g in shared %}
+  <p>
+    {{ g.document.title }} from {{ g.document.owner.username }} ({{ g.level }})
+    <a href="{% url 'download' g.document.id %}">Download</a>
+  </p>
+{% empty %}
+  <p>Nothing has been shared with you.</p>
+{% endfor %}

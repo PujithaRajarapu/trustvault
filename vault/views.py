@@ -28,7 +28,10 @@ def register(request):
 @login_required
 def home(request):
     docs = Document.objects.filter(owner=request.user, is_deleted=False).order_by("-uploaded_at")
-    return render(request, "home.html", {"docs": docs})
+    shared = Grant.objects.filter(
+        user=request.user, document__is_deleted=False
+    ).select_related("document", "document__owner")
+    return render(request, "home.html", {"docs": docs, "shared": shared})
 
 
 @login_required
@@ -51,6 +54,8 @@ def upload(request):
     else:
         form = UploadForm()
     return render(request, "upload.html", {"form": form})
+
+
 @login_required
 def download(request, doc_id):
     doc = authorise(request, doc_id, "download")
@@ -62,6 +67,7 @@ def download(request, doc_id):
     )
     response["X-Content-Type-Options"] = "nosniff"
     return response
+
 
 @login_required
 def share(request, doc_id):
@@ -85,6 +91,7 @@ def share(request, doc_id):
             message = "Shared with " + target.username + "."
     grants = Grant.objects.filter(document=doc).select_related("user")
     return render(request, "share.html", {"doc": doc, "grants": grants, "message": message})
+
 
 @login_required
 def revoke(request, doc_id, user_id):
