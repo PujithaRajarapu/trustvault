@@ -103,3 +103,22 @@ def revoke(request, doc_id, user_id):
             grant.delete()
             log_event(request.user, "revoke", doc, True, "from " + name)
     return redirect("share", doc_id=doc.id)
+
+@login_required
+def search(request):
+    from django.db.models import Q
+    from .models import Document
+    from .audit import log_event
+
+    q = request.GET.get("q", "").strip()[:100]
+    results = []
+    if q:
+        # Only documents this user owns or was given access to. Deleted ones are skipped.
+        results = (
+            Document.objects.filter(is_deleted=False)
+            .filter(Q(owner=request.user) | Q(grant__user=request.user))
+            .filter(Q(title__icontains=q) | Q(category__icontains=q) | Q(original_name__icontains=q))
+            .distinct()
+        )
+        log_event(request.user, "search", None, True, "query: " + q)
+    return render(request, "search.html", {"q": q, "results": results})

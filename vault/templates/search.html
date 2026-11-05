@@ -1,0 +1,20 @@
+<h1>Search</h1>
+<form method="get" action="{% url 'search' %}">
+  <input name="q" value="{{ q }}" maxlength="100" placeholder="Search your documents">
+  <button type="submit">Search</button>
+</form>
+
+{% if q %}
+  {% if results %}
+  <ul>
+    {% for d in results %}
+    <li>{{ d.title }} ({{ d.original_name }})
+      <a href="{% url 'download' d.id %}">Download</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No matching documents.</p>
+  {% endif %}
+{% endif %}
+
+<p><a href="{% url 'home' %}">Back</a></p>
