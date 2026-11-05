@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.http import FileResponse, Http404
-from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 
 from .permissions import authorise
@@ -18,16 +18,23 @@ from .validators import clean_name
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
+
         if form.is_valid():
             user = form.save()
             Profile.objects.create(user=user, role="owner")
             login(request, user)
+
             log_event(user, "register", None, True)
+
             return redirect("home")
     else:
         form = UserCreationForm()
 
-    return render(request, "registration/register.html", {"form": form})
+    return render(
+        request,
+        "registration/register.html",
+        {"form": form}
+    )
 
 
 @login_required
@@ -42,10 +49,14 @@ def home(request):
         document__is_deleted=False
     ).select_related("document", "document__owner")
 
-    return render(request, "home.html", {
-        "docs": docs,
-        "shared": shared
-    })
+    return render(
+        request,
+        "home.html",
+        {
+            "docs": docs,
+            "shared": shared
+        }
+    )
 
 
 @login_required
@@ -67,32 +78,45 @@ def upload(request):
             )
 
             log_event(request.user, "upload", doc, True)
+
             return redirect("home")
 
     else:
         form = UploadForm()
 
-    return render(request, "upload.html", {"form": form})
+    return render(
+        request,
+        "upload.html",
+        {"form": form}
+    )
 
 
 @login_required
 def download(request, doc_id):
+    # Check permissions first.
+    doc = authorise(request, doc_id, "download")
+
     try:
-        doc = authorise(request, doc_id, "download")
+        if not doc.file or not doc.file.name:
+            raise Http404("Document file not found.")
 
-        if doc.is_deleted:
-            raise Http404("Document not found.")
+        storage = doc.file.storage
 
-        if not doc.file or not default_storage.exists(doc.file.name):
-            raise Http404("The document file is missing from storage.")
+        # Check the actual storage backend.
+        if not storage.exists(doc.file.name):
+            raise Http404(
+                "The document file is missing from storage."
+            )
 
         file_handle = doc.file.open("rb")
 
         response = FileResponse(
             file_handle,
             as_attachment=True,
-            filename=doc.original_name,
-            content_type=doc.content_type or "application/octet-stream",
+            filename=doc.original_name or "download",
+            content_type=(
+                doc.content_type or "application/octet-stream"
+            ),
         )
 
         response["X-Content-Type-Options"] = "nosniff"
@@ -101,12 +125,13 @@ def download(request, doc_id):
 
         return response
 
-    except PermissionDenied:
-        log_event(request.user, "download", None, False, "Permission denied")
-        raise
-
     except Http404:
         raise
+
+    except (FileNotFoundError, OSError):
+        raise Http404(
+            "Unable to locate the document file."
+        )
 
 
 @login_required
@@ -152,11 +177,15 @@ def share(request, doc_id):
         document=doc
     ).select_related("user")
 
-    return render(request, "share.html", {
-        "doc": doc,
-        "grants": grants,
-        "message": message
-    })
+    return render(
+        request,
+        "share.html",
+        {
+            "doc": doc,
+            "grants": grants,
+            "message": message
+        }
+    )
 
 
 @login_required
@@ -204,9 +233,19 @@ def search(request):
             .distinct()
         )
 
-        log_event(request.user, "search", None, True, "query: " + q)
+        log_event(
+            request.user,
+            "search",
+            None,
+            True,
+            "query: " + q
+        )
 
-    return render(request, "search.html", {
-        "q": q,
-        "results": results
-    })
+    return render(
+        request,
+        "search.html",
+        {
+            "q": q,
+            "results": results
+        }
+    )
