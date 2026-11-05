@@ -79,6 +79,7 @@ Locally it uses SQLite. On Render it uses Postgres (Neon).
     .venv\Scripts\activate
     pip install -r requirements.txt
     python manage.py migrate
+    $env:DEMO_PASSWORD="Rise@123"
     python manage.py seed_demo
     python manage.py runserver
 
@@ -104,9 +105,10 @@ On Mac or Linux, activate with `source .venv/bin/activate`.
    | `ALLOWED_HOSTS` | Your Render host name, e.g. `trustvault-pooja.onrender.com` |
    | `CSRF_TRUSTED_ORIGINS` | `https://trustvault-pooja.onrender.com` |
    | `DATABASE_URL` | The Neon connection string |
+    | `DEMO_PASSWORD` | The password for the demo accounts (`Rise@123`) |
 
    If `DATABASE_URL` is not set, the site uses SQLite (local development).
-5. The build script installs the packages, runs the migrations and creates the demo accounts.
+5. The build script installs the packages and runs the migrations. Demo accounts are created by `python manage.py seed_demo`, which needs the `DEMO_PASSWORD` variable.
 
 ## Threats
 
