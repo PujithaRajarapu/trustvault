@@ -2,7 +2,7 @@
 
 Where the AI was wrong, and what I did about it.
 
-AI tool used: Claude (claude.ai), in chat, to guide me step by step.
+AI tools used: Claude (claude.ai), in chat, to guide me step by step. I also used ChatGPT and DeepSeek after building, for suggestions and code review (see entry 8).
 
 ## 1. 3 Nov 2026: Choosing a stack (a decision, not a mistake)
 - **Asked:** Which stack should I use? I said I did not know.
@@ -46,7 +46,14 @@ AI tool used: Claude (claude.ai), in chat, to guide me step by step.
 - **Fix:** I kept my own tests, which go through the real download and share pages with a real uploaded file, and added the stranger cases.
 - **Commit:** https://github.com/PujithaRajarapu/trustvault/commit/80742a2
 
+## 8. 5 Nov 2026: Unreviewed edits from other AIs (authorisation and audit)
+- **Asked:** I asked ChatGPT and DeepSeek to improve my code.
+- **AI got wrong:** They returned about 300 lines of changes across `permissions.py`, `models.py`, `views.py`, `admin_views.py` and `settings.py`, plus a new database migration that changed the audit log and grants tables. They rewrote my `authorise()` function and removed my comments. One change made an unknown action return 404 without writing it to the audit log, which breaks my rule that refused attempts are always logged.
+- **Why it mattered:** I had not read or tested the edits. A table migration one day before the deadline could break my live database, which already holds data and an audit chain.
+- **Fix:** I did not ship them. I saved them aside in a git stash (not committed), confirmed that my pushed version passes all 22 tests, and kept my own code. The version I kept is this commit: https://github.com/PujithaRajarapu/trustvault/commit/36c01e0
+
 ## Instructions I reused with the AI
 - "One command at a time" (after pasted multi-line commands ran together).
 - "Explain it in simple words" and "give me only one step".
 - "Check against my real files before changing anything."
+- "Do not ship edits I have not read and tested."
