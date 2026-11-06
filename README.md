@@ -5,14 +5,11 @@ A secure document-sharing website. A document can only be opened by its owner an
 **Live site:** https://trustvault-pooja.onrender.com
 (The free plan sleeps when idle. The first load can take about a minute.)
 
-
-
-## Demo Video
+## Demo video
 
 Watch the TrustVault project demonstration:
 
 [Click here to watch the demo](https://youtu.be/Jk8fNHg4PpQ)
-
 
 ## Demo logins
 
@@ -86,13 +83,13 @@ Locally it uses SQLite. On Render it uses Postgres (Neon).
     .venv\Scripts\activate
     pip install -r requirements.txt
     python manage.py migrate
-    | `DEMO_PASSWORD` | The password for the demo accounts (`Rise@123`) |
+    $env:DEMO_PASSWORD="Rise@123"
     python manage.py seed_demo
     python manage.py runserver
 
 Then open http://127.0.0.1:8000/ and log in with the demo accounts above.
 
-On Mac or Linux, activate with `source .venv/bin/activate`.
+On Mac or Linux, activate with `source .venv/bin/activate` and use `export DEMO_PASSWORD="Rise@123"`.
 
 ## Run the tests
 
@@ -112,7 +109,7 @@ On Mac or Linux, activate with `source .venv/bin/activate`.
    | `ALLOWED_HOSTS` | Your Render host name, e.g. `trustvault-pooja.onrender.com` |
    | `CSRF_TRUSTED_ORIGINS` | `https://trustvault-pooja.onrender.com` |
    | `DATABASE_URL` | The Neon connection string |
-    | `DEMO_PASSWORD` | The password for the demo accounts (`Rise@123`) |
+   | `DEMO_PASSWORD` | The password for the demo accounts (`Rise@123`) |
 
    If `DATABASE_URL` is not set, the site uses SQLite (local development).
 5. The build script installs the packages and runs the migrations. Demo accounts are created by `python manage.py seed_demo`, which needs the `DEMO_PASSWORD` variable.
@@ -122,11 +119,12 @@ On Mac or Linux, activate with `source .venv/bin/activate`.
 See THREATS.md.
 
 ## AI use
-See PROMPTS.md. I used Claude (claude.ai) in chat to guide me step by step. I also used ChatGPT and DeepSeek after building, to test and review my code. The AI made mistakes that I caught and fixed. They are described there.
+
+See PROMPTS.md. I used Claude (claude.ai) in chat to guide me step by step. I also used ChatGPT and DeepSeek after building, to test and review my code; I did not ship their unreviewed edits. The AI made mistakes that I caught and fixed. They are described there.
 
 ## Known limits (what is unfinished)
 
-- The free host deletes uploaded files when the site restarts. The database stays. The sample document is recreated on every deploy. A real fix is cloud storage such as S3.
+- The free host deletes uploaded files when the site restarts. The database stays. The demo sample file is recreated only when `seed_demo` is run by hand. A real fix is cloud storage such as S3.
 - Delete is a soft delete: the document is hidden from everyone, but the record and file stay on the server. There is no recovery page.
 - Edit or rename of a document is not built.
 - Attempts by people who are not logged in are not written to the audit log, because the login redirect happens first.
